@@ -14,6 +14,7 @@ structured test plan covering the full pyramid (unit, integration, E2E), identif
 recommends tooling, and defines success criteria.
 
 **Invoke:** `/skill:test-architect`
+**Install (Claude desktop):** `skills/testing/test-architect.skill`
 
 ---
 
@@ -23,6 +24,7 @@ Generates REST/GraphQL API test suites in TypeScript. Covers happy paths, error 
 schema validation, and edge cases. All external dependencies are mocked — no live services.
 
 **Invoke:** `/skill:api-test-engineer`
+**Install (Claude desktop):** `skills/testing/api-test-engineer.skill`
 
 ---
 
@@ -32,6 +34,7 @@ Audits web pages for WCAG 2.1/2.2 AA violations using axe-core with Playwright. 
 prioritized violation report and ready-to-run `accessibility.spec.ts`.
 
 **Invoke:** `/skill:accessibility-auditor`
+**Install (Claude desktop):** `skills/testing/accessibility-auditor.skill`
 
 ---
 
@@ -42,6 +45,7 @@ Covers lint, type check, unit coverage thresholds, integration tests, E2E, secur
 and accessibility — all blocking, not just warning.
 
 **Invoke:** `/skill:ci-quality-gatekeeper`
+**Install (Claude desktop):** `skills/testing/ci-quality-gatekeeper.skill`
 
 ---
 
@@ -54,6 +58,55 @@ outputs a GitHub Actions CI config.
 **Invoke:** `/skill:playwright-qa-agent`
 
 **Install (Claude desktop):** Save `skills/testing/playwright-qa-agent.skill` via the Claude desktop app.
+
+---
+
+## Adding a New Skill
+
+Skills are plain directories with a `SKILL.md` file. Both Claude and Pi discover and load them
+automatically.
+
+### 1. Create the skill directory
+
+```bash
+mkdir -p skills/testing/my-skill
+```
+
+### 2. Write `SKILL.md`
+
+```markdown
+---
+name: my-skill
+description: >
+  One or two sentences describing what this skill does and when to use it.
+  Be specific — this text determines when the agent loads the skill.
+---
+
+# My Skill
+
+Instructions for the agent go here. Include setup steps, usage patterns,
+expected outputs, and any scripts or reference files to load.
+```
+
+Frontmatter rules: `name` must be lowercase with hyphens only, max 64 chars. `description` is
+required and max 1024 chars. See the [Agent Skills spec](https://agentskills.io/specification)
+for the full reference.
+
+### 3. Install in Claude desktop
+
+```bash
+# Zip the skill directory into a .skill bundle
+cd skills/testing
+zip -r my-skill.skill my-skill/
+```
+
+Then drag `my-skill.skill` into the Claude desktop app (Settings → Skills → Install from file),
+or save it via the skills panel.
+
+### 4. Use in Pi
+
+No extra steps — Pi auto-discovers skills from `skills/testing/` via `.pi/settings.json`. Restart
+Pi and invoke with `/skill:my-skill`.
 
 ---
 
@@ -90,5 +143,9 @@ skills/
     playwright-qa-agent/
       SKILL.md
       scripts/
-    playwright-qa-agent.skill  # Installable bundle for Claude desktop
+    test-architect.skill
+    api-test-engineer.skill
+    accessibility-auditor.skill
+    ci-quality-gatekeeper.skill
+    playwright-qa-agent.skill
 ```
