@@ -1,33 +1,51 @@
 # claude_agents
 
-A collection of Claude skills and agents built for quality engineering workflows.
+A collection of Claude/Pi-compatible skills for quality engineering workflows.
 
 ## Skills
 
-### playwright-test-writer
+### playwright-qa-agent
 
-Generates a structured Playwright test plan and TypeScript spec files for any URL.
+Full-site Playwright UI QA agent. Crawls a site, discovers all significant pages and user flows, generates a complete multi-page TypeScript UI test suite using Page Objects, executes the tests, and outputs a test plan doc, spec files, test run results, and a GitHub Actions CI config.
 
-**Outputs two files per run:**
-- `[slug].page.ts` — Page Object class with named locators and action methods
-- `[slug].spec.ts` — Spec file covering User Flows, Visual, Accessibility, and API suites
+**Outputs per run:**
+- Page Object classes with named locators and action methods
+- Spec files covering User Flows, Visual, and Accessibility suites
+- GitHub Actions CI config
+- Test run results
 
-**Supports two analysis modes:**
-- **Playwright MCP** (preferred) — drives a real browser via accessibility tree for accurate, role-based locators
-- **web_fetch** (fallback) — static HTML extraction with `// TODO: verify locator` flags on uncertain selectors
-
-**Install:** Save `skills/playwright-test-writer.skill` via the Claude desktop app.
+**Install (Claude desktop):** Save `skills/playwright-qa-agent.skill` via the Claude desktop app.
 
 **Run generated tests:**
 ```bash
-npx playwright test [slug].spec.ts
+npx playwright test
+```
+
+## Pi Integration
+
+This repo supports [Pi coding agent](https://pi.dev) out of the box. Skills are discoverable by Pi via `.pi/settings.json`.
+
+**Setup:**
+```bash
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+export ANTHROPIC_API_KEY=your_key
+pi
+```
+
+**Invoke a skill directly:**
+```bash
+/skill:playwright-qa-agent
 ```
 
 ## Structure
 
 ```
+.pi/
+  settings.json               # Pi config (provider, model, skill paths)
+AGENTS.md                     # Repo context for Pi and other coding agents
 skills/
-  playwright-test-writer/
-    SKILL.md                     # Skill prompt
-  playwright-test-writer.skill   # Installable skill bundle
+  playwright-qa-agent/
+    SKILL.md                  # Skill prompt
+    scripts/                  # Helper scripts
+  playwright-qa-agent.skill   # Installable skill bundle
 ```
