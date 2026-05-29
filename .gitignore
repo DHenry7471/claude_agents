@@ -1,0 +1,21 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Pi session files
+.pi/sessions/
+*.pi-session
+
+# Test output
+playwright-report/
+test-results/
+coverage/
+
+# Environment
+.env
+.env.local
