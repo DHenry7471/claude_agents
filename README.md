@@ -1,51 +1,94 @@
 # claude_agents
 
-A collection of Claude/Pi-compatible skills for quality engineering workflows.
+A collection of Claude/Pi-compatible skills for quality engineering workflows. Focused on SDET
+tooling — test strategy, API testing, UI automation, accessibility, and CI quality gates.
 
 ## Skills
 
+All skills live in `skills/testing/` and follow the [Agent Skills standard](https://agentskills.io/specification).
+
+### test-architect
+
+Designs comprehensive test strategies for services, features, or entire products. Produces a
+structured test plan covering the full pyramid (unit, integration, E2E), identifies coverage gaps,
+recommends tooling, and defines success criteria.
+
+**Invoke:** `/skill:test-architect`
+
+---
+
+### api-test-engineer
+
+Generates REST/GraphQL API test suites in TypeScript. Covers happy paths, error cases, auth,
+schema validation, and edge cases. All external dependencies are mocked — no live services.
+
+**Invoke:** `/skill:api-test-engineer`
+
+---
+
+### accessibility-auditor
+
+Audits web pages for WCAG 2.1/2.2 AA violations using axe-core with Playwright. Produces a
+prioritized violation report and ready-to-run `accessibility.spec.ts`.
+
+**Invoke:** `/skill:accessibility-auditor`
+
+---
+
+### ci-quality-gatekeeper
+
+Designs and implements CI/CD quality gates for GitHub Actions (or GitLab CI, CircleCI).
+Covers lint, type check, unit coverage thresholds, integration tests, E2E, security scanning,
+and accessibility — all blocking, not just warning.
+
+**Invoke:** `/skill:ci-quality-gatekeeper`
+
+---
+
 ### playwright-qa-agent
 
-Full-site Playwright UI QA agent. Crawls a site, discovers all significant pages and user flows, generates a complete multi-page TypeScript UI test suite using Page Objects, executes the tests, and outputs a test plan doc, spec files, test run results, and a GitHub Actions CI config.
+Full-site Playwright UI QA agent. Crawls a site, discovers all significant pages and user flows,
+generates a complete multi-page TypeScript test suite with Page Objects, executes the tests, and
+outputs a GitHub Actions CI config.
 
-**Outputs per run:**
-- Page Object classes with named locators and action methods
-- Spec files covering User Flows, Visual, and Accessibility suites
-- GitHub Actions CI config
-- Test run results
+**Invoke:** `/skill:playwright-qa-agent`
 
-**Install (Claude desktop):** Save `skills/playwright-qa-agent.skill` via the Claude desktop app.
+**Install (Claude desktop):** Save `skills/testing/playwright-qa-agent.skill` via the Claude desktop app.
 
-**Run generated tests:**
-```bash
-npx playwright test
-```
+---
 
 ## Pi Integration
 
-This repo supports [Pi coding agent](https://pi.dev) out of the box. Skills are discoverable by Pi via `.pi/settings.json`.
+This repo supports [Pi coding agent](https://pi.dev) out of the box.
 
-**Setup:**
 ```bash
 npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 export ANTHROPIC_API_KEY=your_key
+cd claude_agents
 pi
 ```
 
-**Invoke a skill directly:**
-```bash
-/skill:playwright-qa-agent
-```
+All skills are auto-discovered from `skills/testing/` via `.pi/settings.json`. Invoke any skill
+with `/skill:<name>`.
 
 ## Structure
 
 ```
 .pi/
-  settings.json               # Pi config (provider, model, skill paths)
+  settings.json               # Pi config
 AGENTS.md                     # Repo context for Pi and other coding agents
 skills/
-  playwright-qa-agent/
-    SKILL.md                  # Skill prompt
-    scripts/                  # Helper scripts
-  playwright-qa-agent.skill   # Installable skill bundle
+  testing/
+    test-architect/
+      SKILL.md
+    api-test-engineer/
+      SKILL.md
+    accessibility-auditor/
+      SKILL.md
+    ci-quality-gatekeeper/
+      SKILL.md
+    playwright-qa-agent/
+      SKILL.md
+      scripts/
+    playwright-qa-agent.skill  # Installable bundle for Claude desktop
 ```
