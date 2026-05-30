@@ -208,6 +208,63 @@ Pi and invoke with `/skill:my-skill`.
 
 ---
 
+## MCP Server
+
+The `mcp/` directory contains a Node.js MCP server that exposes every agent and skill as a
+callable tool. Each tool invocation calls the Anthropic API with the agent or skill's system
+prompt and returns the result.
+
+### Setup
+
+```bash
+cd mcp
+npm install
+npm run build
+```
+
+### Running
+
+```bash
+ANTHROPIC_API_KEY=sk-... npm start
+```
+
+### Wiring into Claude Code / Cowork
+
+Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "claude-agents": {
+      "command": "node",
+      "args": ["/path/to/claude_agents/mcp/dist/index.js"],
+      "env": { "ANTHROPIC_API_KEY": "sk-..." }
+    }
+  }
+}
+```
+
+### Registered tools
+
+| Tool | Type |
+|------|------|
+| `tessa-test-strategist` | Agent |
+| `ambrosine-api-tester` | Agent |
+| `ernie-e2e-test-writer` | Agent |
+| `clint-ci-gatekeeper` | Agent |
+| `skill-testing-test-architect` | Skill |
+| `skill-testing-api-test-engineer` | Skill |
+| `skill-testing-accessibility-auditor` | Skill |
+| `skill-testing-ci-quality-gatekeeper` | Skill |
+| `skill-testing-playwright-qa-agent` | Skill |
+| `list-agents-and-skills` | Utility |
+
+New agents and skills are picked up automatically on restart — no code changes needed.
+
+Every tool accepts: `task` (string, required), `model` (optional override), `max_tokens` (optional, default 8192).
+
+---
+
 ## Pi Integration
 
 This repo supports [Pi coding agent](https://pi.dev) out of the box.
@@ -233,6 +290,13 @@ agents/
   ambrosine-api-tester.md     # API test suite generator
   ernie-e2e-test-writer.md    # Playwright E2E spec writer
   clint-ci-gatekeeper.md      # CI/CD quality gate implementer
+mcp/
+  src/
+    index.ts                  # MCP server entry point
+    loader.ts                 # Agent + skill frontmatter parser
+  package.json
+  tsconfig.json
+  README.md
 skills/
   testing/
     test-architect/
