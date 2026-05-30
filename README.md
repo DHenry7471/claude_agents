@@ -1,7 +1,105 @@
 # claude_agents
 
-A collection of Claude/Pi-compatible skills for quality engineering workflows. Focused on SDET
+A collection of Claude Code agents and skills for quality engineering workflows. Focused on SDET
 tooling — test strategy, API testing, UI automation, accessibility, and CI quality gates.
+
+## Agents
+
+Custom subagents live in `agents/`. Each is a Markdown file with YAML frontmatter that Claude
+Code loads and can invoke via the `Agent` tool or by name.
+
+### tessa-test-strategist
+
+Designs comprehensive test strategies for features, services, or entire products. Audits
+coverage across the full pyramid (unit, integration, E2E), identifies gaps, recommends tooling,
+and produces a structured `TEST_STRATEGY.md`.
+
+**File:** `agents/tessa-test-strategist.md` | **Color:** purple
+
+---
+
+### ambrosine-api-tester
+
+Generates TypeScript API test suites for REST or GraphQL endpoints. Covers happy paths, error
+cases, auth, schema validation, and edge cases. All external dependencies are mocked.
+
+**File:** `agents/ambrosine-api-tester.md` | **Color:** green
+
+---
+
+### ernie-e2e-test-writer
+
+Writes production-ready Playwright E2E spec files for an existing test project. Reads project
+conventions, generates missing specs following the Page Object Model, and layers in axe-core
+accessibility tests.
+
+**File:** `agents/ernie-e2e-test-writer.md` | **Color:** cyan
+
+---
+
+### clint-ci-gatekeeper
+
+Designs and implements CI/CD quality gates for GitHub Actions (or GitLab CI, CircleCI).
+Audits the existing pipeline against a full gate taxonomy and produces ready-to-commit
+workflow files.
+
+**File:** `agents/clint-ci-gatekeeper.md` | **Color:** orange
+
+---
+
+## Adding a New Agent
+
+Agents are plain Markdown files with YAML frontmatter stored in `agents/`.
+
+### 1. Create the agent file
+
+```bash
+touch agents/my-agent.md
+```
+
+### 2. Write the frontmatter and instructions
+
+```markdown
+---
+name: my-agent
+description: >
+  One or two sentences describing what this agent does and when to invoke it.
+  Be specific — Claude Code uses this text to decide when to route to the agent.
+model: inherit
+color: blue
+tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
+---
+
+You are a [role]. Your job is to [goal].
+
+## Phase 1 — ...
+```
+
+**Frontmatter fields:**
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| `name` | Yes | Lowercase, hyphens only, max 64 chars |
+| `description` | Yes | Used for routing; be specific, max 1024 chars |
+| `model` | No | `inherit` uses the current session model; or pin a model ID |
+| `color` | No | `red`, `orange`, `yellow`, `green`, `cyan`, `blue`, `purple`, `pink` |
+| `tools` | No | Restrict tool access; omit to allow all tools |
+
+### 3. Install in Claude Code
+
+**User-level** (available in all projects):
+```bash
+cp agents/my-agent.md ~/.claude/agents/
+```
+
+**Project-level** (this repo only):
+```bash
+cp agents/my-agent.md .claude/agents/
+```
+
+Claude Code auto-discovers agents from both locations on startup.
+
+---
 
 ## Skills
 
@@ -130,6 +228,11 @@ with `/skill:<name>`.
 .pi/
   settings.json               # Pi config
 AGENTS.md                     # Repo context for Pi and other coding agents
+agents/
+  tessa-test-strategist.md    # Test strategy designer
+  ambrosine-api-tester.md     # API test suite generator
+  ernie-e2e-test-writer.md    # Playwright E2E spec writer
+  clint-ci-gatekeeper.md      # CI/CD quality gate implementer
 skills/
   testing/
     test-architect/
