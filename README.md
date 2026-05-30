@@ -47,6 +47,61 @@ workflow files.
 
 ---
 
+### felix-failure-triage
+
+Triages CI test failures by classifying them as regressions, flaky tests,
+environment noise, or test bugs. Accepts Vitest and Playwright JSON reports plus
+flakiness history. Returns a structured verdict with root cause hypotheses,
+recommended owners, and a merge-block recommendation.
+
+**File:** `agents/felix-failure-triage.md` | **Color:** red
+
+---
+
+### greta-coverage-analyst
+
+Analyses V8 coverage reports and source files to surface untested business logic
+ranked by risk — not just line percentage. Identifies uncovered error paths, state
+transitions, and validation branches. Produces a prioritised gap report with
+concrete test stubs for every CRITICAL and HIGH gap.
+
+**File:** `agents/greta-coverage-analyst.md` | **Color:** yellow
+
+---
+
+### iris-insight-reporter
+
+Interprets CI run history data and produces a concise quality health summary for
+the Horus dashboard. Detects pass rate trends, coverage drift, pyramid imbalance,
+and anomalies. Returns an embeddable HTML snippet (for the dashboard panel) and a
+plain-text summary (for Slack or PR comments).
+
+**File:** `agents/iris-insight-reporter.md` | **Color:** blue
+
+---
+
+### percy-pr-reviewer
+
+Reviews pull request diffs touching test files and enforces quality engineering
+standards: AAA pattern, given/when/then naming, pyramid layer compliance, mock
+injection via `@horus/test-utils`, test isolation, and no logic in tests. Posts
+structured inline review comments with must-fix and recommended categories.
+
+**File:** `agents/percy-pr-reviewer.md` | **Color:** pink
+
+---
+
+### saxon-spec-to-test
+
+Converts ADRs, GitHub issues, feature specs, or user stories into production-ready
+Vitest test scaffolds. Reads the codebase to use correct method signatures, types,
+and builders. Assigns each scenario to the right pyramid layer and generates
+complete files with AAA stubs ready to fill in.
+
+**File:** `agents/saxon-spec-to-test.md` | **Color:** purple
+
+---
+
 ## Adding a New Agent
 
 Agents are plain Markdown files with YAML frontmatter stored in `agents/`.
@@ -246,18 +301,23 @@ Add to your `claude_desktop_config.json`:
 
 ### Registered tools
 
-| Tool | Type |
-|------|------|
-| `tessa-test-strategist` | Agent |
-| `ambrosine-api-tester` | Agent |
-| `ernie-e2e-test-writer` | Agent |
-| `clint-ci-gatekeeper` | Agent |
-| `skill-testing-test-architect` | Skill |
-| `skill-testing-api-test-engineer` | Skill |
-| `skill-testing-accessibility-auditor` | Skill |
-| `skill-testing-ci-quality-gatekeeper` | Skill |
-| `skill-testing-playwright-qa-agent` | Skill |
-| `list-agents-and-skills` | Utility |
+| Tool                                  | Type    |
+|---------------------------------------|---------|
+| `tessa-test-strategist`               | Agent   |
+| `ambrosine-api-tester`                | Agent   |
+| `ernie-e2e-test-writer`               | Agent   |
+| `clint-ci-gatekeeper`                 | Agent   |
+| `felix-failure-triage`                | Agent   |
+| `greta-coverage-analyst`              | Agent   |
+| `iris-insight-reporter`               | Agent   |
+| `percy-pr-reviewer`                   | Agent   |
+| `saxon-spec-to-test`                  | Agent   |
+| `skill-testing-test-architect`        | Skill   |
+| `skill-testing-api-test-engineer`     | Skill   |
+| `skill-testing-accessibility-auditor` | Skill   |
+| `skill-testing-ci-quality-gatekeeper` | Skill   |
+| `skill-testing-playwright-qa-agent`   | Skill   |
+| `list-agents-and-skills`              | Utility |
 
 New agents and skills are picked up automatically on restart — no code changes needed.
 
@@ -290,6 +350,11 @@ agents/
   ambrosine-api-tester.md     # API test suite generator
   ernie-e2e-test-writer.md    # Playwright E2E spec writer
   clint-ci-gatekeeper.md      # CI/CD quality gate implementer
+  felix-failure-triage.md     # CI failure classifier and triage reporter
+  greta-coverage-analyst.md   # Risk-ranked coverage gap analyst
+  iris-insight-reporter.md    # CI history quality health reporter
+  percy-pr-reviewer.md        # Test code PR reviewer
+  saxon-spec-to-test.md       # Spec-to-test scaffold generator
 mcp/
   src/
     index.ts                  # MCP server entry point
