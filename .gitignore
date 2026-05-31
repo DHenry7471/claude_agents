@@ -20,6 +20,9 @@ playwright-report/
 test-results/
 coverage/
 
+# Claude Code worktrees (isolated working copies created by EnterWorktree)
+.claude/worktrees/
+
 # Environment
 .env
 .env.local
