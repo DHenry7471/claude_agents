@@ -1,5 +1,5 @@
 {
-  "name": "@devonhenry/claude-agents",
+  "name": "@wutangbanger/claude-agents",
   "version": "1.0.0",
   "description": "Quality engineering agents and skills for the Horus platform — bundled as a self-contained npm package",
   "type": "module",

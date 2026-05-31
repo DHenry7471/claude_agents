@@ -5,7 +5,7 @@ Quality engineering agents and skills for the Horus platform — published as a 
 ## Install
 
 ```bash
-npm install @devonhenry/claude-agents
+npm install @wutangbanger/claude-agents
 # or while the package is local:
 npm install file:../claude_agents/mcp
 ```
@@ -13,7 +13,7 @@ npm install file:../claude_agents/mcp
 ## Programmatic use
 
 ```typescript
-import { runAgent, listAgents } from '@devonhenry/claude-agents';
+import { runAgent, listAgents } from '@wutangbanger/claude-agents';
 
 // Full slug or short alias both work
 const { output } = await runAgent('felix-failure-triage', task);
