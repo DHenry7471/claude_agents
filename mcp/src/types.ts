@@ -20,9 +20,23 @@ export interface AgentOptions {
   maxTokens?: number;
   /** Override ANTHROPIC_API_KEY for this call. */
   apiKey?: string;
+  /** Request timeout in milliseconds (default: 180_000). */
+  timeoutMs?: number;
+}
+
+export interface AgentUsage {
+  inputTokens: number;
+  outputTokens: number;
+  /** Tokens served from the prompt cache (billed at ~10% of normal input rate). */
+  cacheReadTokens: number;
+  /** Tokens written into the prompt cache on this call. */
+  cacheCreationTokens: number;
 }
 
 export interface AgentResult {
   agent: string;
   output: string;
+  model: string;
+  stopReason: string;
+  usage: AgentUsage;
 }

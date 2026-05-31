@@ -46,7 +46,13 @@ async function runWithSystemPrompt(
   const message = await anthropic.messages.create({
     model,
     max_tokens: maxTokens,
-    system: systemPrompt,
+    system: [
+      {
+        type: 'text',
+        text: systemPrompt,
+        cache_control: { type: 'ephemeral' },
+      },
+    ],
     messages: [{ role: 'user', content: task }],
   });
 
