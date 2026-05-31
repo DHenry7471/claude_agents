@@ -10,7 +10,7 @@ const DEFAULT_TIMEOUT_MS = 180_000;
  *
  * @param agentName - Full slug (e.g. "felix-failure-triage") or short alias (e.g. "felix").
  * @param task      - The task or question to pass to the agent.
- * @param options   - Optional model, maxTokens, and apiKey overrides.
+ * @param options   - Optional model, maxTokens, apiKey, and timeoutMs overrides.
  */
 export async function runAgent(
   agentName: string,
@@ -30,13 +30,20 @@ export async function runAgent(
 
   const model = options.model ?? process.env.CLAUDE_AGENTS_MODEL ?? agent.model;
   const maxTokens = options.maxTokens ?? DEFAULT_MAX_TOKENS;
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
-  const client = new Anthropic({ apiKey, timeout: DEFAULT_TIMEOUT_MS });
+  const client = new Anthropic({ apiKey, timeout: timeoutMs });
 
   const message = await client.messages.create({
     model,
     max_tokens: maxTokens,
-    system: agent.systemPrompt,
+    system: [
+      {
+        type: 'text',
+        text: agent.systemPrompt,
+        cache_control: { type: 'ephemeral' },
+      },
+    ],
     messages: [{ role: 'user', content: task }],
   });
 
@@ -45,5 +52,17 @@ export async function runAgent(
     .map(b => b.text)
     .join('\n\n');
 
-  return { agent: agentName, output };
+  const u = message.usage;
+  return {
+    agent: agentName,
+    output,
+    model,
+    stopReason: message.stop_reason ?? 'unknown',
+    usage: {
+      inputTokens: u.input_tokens,
+      outputTokens: u.output_tokens,
+      cacheReadTokens: u.cache_read_input_tokens ?? 0,
+      cacheCreationTokens: u.cache_creation_input_tokens ?? 0,
+    },
+  };
 }
