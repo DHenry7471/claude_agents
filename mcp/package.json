@@ -1,23 +1,45 @@
 {
-  "name": "claude-agents-mcp",
+  "name": "claude-agents",
   "version": "1.0.0",
-  "description": "MCP server exposing claude_agents agents and skills as callable tools",
+  "description": "Quality engineering agents and skills for the Horus platform — bundled as a self-contained npm package",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./mcp": {
+      "import": "./dist/mcp.js"
+    }
+  },
+  "bin": {
+    "claude-agents-mcp": "./dist/mcp.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
+    "prebuild": "node scripts/bundle-prompts.mjs",
     "build": "tsc",
-    "dev": "tsx src/index.ts",
-    "start": "node dist/index.js"
+    "dev": "tsx src/mcp.ts",
+    "start": "node dist/mcp.js",
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.52.0",
     "@modelcontextprotocol/sdk": "^1.12.0",
-    "gray-matter": "^4.0.3",
     "zod": "^3.25.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "gray-matter": "^4.0.3",
     "tsx": "^4.19.0",
     "typescript": "^5.8.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

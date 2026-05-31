@@ -7,6 +7,10 @@
 node_modules/
 npm-debug.log*
 
+# Generated build artifacts
+mcp/src/generated/
+mcp/dist/
+
 # Pi session files
 .pi/sessions/
 *.pi-session

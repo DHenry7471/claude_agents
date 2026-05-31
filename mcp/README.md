@@ -1,84 +1,86 @@
-# claude-agents-mcp
+# claude-agents
 
-An MCP server that exposes every agent and skill in this repo as a callable tool.
+Quality engineering agents and skills for the Horus platform — published as a self-contained npm package. Agent system prompts are bundled at build time, so no external file paths or `CLAUDE_AGENTS_DIR` are needed.
 
-## How it works
-
-At startup the server reads:
-- `../agents/*.md` — each agent becomes a tool named after its slug (e.g. `tessa-test-strategist`)
-- `../skills/<category>/<skill>/SKILL.md` — each skill becomes a tool named `skill-<category>-<skill>`
-
-Each tool accepts a `task` string, calls the Anthropic API with the agent/skill's system prompt, and returns the result as text.
-
-## Setup
+## Install
 
 ```bash
-cd mcp
-npm install
-npm run build
+npm install claude-agents
+# or while the package is local:
+npm install file:../claude_agents/mcp
 ```
 
-## Running
+## Programmatic use
+
+```typescript
+import { runAgent, listAgents } from 'claude-agents';
+
+// Full slug or short alias both work
+const { output } = await runAgent('felix-failure-triage', task);
+const { output } = await runAgent('felix', task);
+
+// With options
+const { output } = await runAgent('tessa', task, {
+  model: 'claude-opus-4-8',
+  maxTokens: 16384,
+});
+
+// List all bundled agents
+const agents = listAgents();
+```
+
+Reads `ANTHROPIC_API_KEY` from the environment. Override per-call via `options.apiKey`.
+
+## MCP server
+
+Run the bundled agents as MCP tools (for Claude Code / IDE integration):
 
 ```bash
-ANTHROPIC_API_KEY=sk-... npm start
+ANTHROPIC_API_KEY=sk-... npx claude-agents-mcp
 ```
 
-Or in dev mode (no build step):
-
-```bash
-ANTHROPIC_API_KEY=sk-... npm run dev
-```
-
-## Claude Code / Cowork config
-
-Add to your `claude_desktop_config.json` or `.mcp.json`:
+Add to `.mcp.json` or `claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "claude-agents": {
-      "command": "node",
-      "args": ["/path/to/claude_agents/mcp/dist/index.js"],
-      "env": {
-        "ANTHROPIC_API_KEY": "sk-..."
-      }
+      "command": "npx",
+      "args": ["claude-agents-mcp"],
+      "env": { "ANTHROPIC_API_KEY": "sk-..." }
     }
   }
 }
 ```
 
-## Tools registered
+## Build (contributors)
 
-| Tool | Type | Description |
-|------|------|-------------|
-| `tessa-test-strategist` | Agent | Designs comprehensive test strategies |
-| `ambrosine-api-tester` | Agent | Generates TypeScript API test suites |
-| `clint-ci-gatekeeper` | Agent | Designs and implements CI/CD quality gates |
-| `ernie-e2e-test-writer` | Agent | Writes Playwright E2E spec files |
-| `skill-testing-test-architect` | Skill | Test strategy and planning |
-| `skill-testing-api-test-engineer` | Skill | API test generation |
-| `skill-testing-ci-quality-gatekeeper` | Skill | CI/CD gate design |
-| `skill-testing-playwright-qa-agent` | Skill | Full-site Playwright QA |
-| `skill-testing-accessibility-auditor` | Skill | WCAG accessibility auditing |
-| `list-agents-and-skills` | Utility | Lists all registered tools with descriptions |
+Agent and skill prompts are bundled at build time from `../agents/` and `../skills/`:
 
-## Tool input schema
-
-Every agent/skill tool accepts the same input:
-
-```json
-{
-  "task": "string — what you want the agent to do",
-  "model": "string (optional) — model override, e.g. claude-opus-4-6",
-  "max_tokens": "number (optional) — defaults to 8192"
-}
+```bash
+npm run build   # runs bundle-prompts.mjs then tsc
+npm run dev     # tsx src/mcp.ts — no build step needed
 ```
+
+Adding or editing agents/skills requires a rebuild before the changes appear in the package.
+
+## Bundled agents
+
+| Slug | Alias | Purpose |
+|------|-------|---------|
+| `felix-failure-triage` | `felix` | Triage CI test failures |
+| `greta-coverage-analyst` | `greta` | Risk-ranked coverage gap analysis |
+| `iris-insight-reporter` | `iris` | Quality health summary for the dashboard |
+| `percy-pr-reviewer` | `percy` | Review test-file PRs |
+| `saxon-spec-to-test` | `saxon` | Convert specs/issues into test scaffolds |
+| `tessa-test-strategist` | `tessa` | Design test strategies |
+| `clint-ci-gatekeeper` | `clint` | CI/CD quality gate implementation |
+| `ambrosine-api-tester` | `ambrosine` | Generate API test suites |
+| `ernie-e2e-test-writer` | `ernie` | Write Playwright E2E specs |
 
 ## Environment variables
 
 | Variable | Required | Default |
 |----------|----------|---------|
 | `ANTHROPIC_API_KEY` | Yes | — |
-| `AGENTS_DIR` | No | `../agents` (relative to dist/) |
-| `SKILLS_DIR` | No | `../skills` (relative to dist/) |
+| `CLAUDE_AGENTS_MODEL` | No | Each agent's configured model |

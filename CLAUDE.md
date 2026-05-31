@@ -10,21 +10,51 @@ A collection of Claude Code agents and skills for quality engineering (SDET) wor
 2. **`skills/testing/`** — Skill directories (`SKILL.md` + optional scripts) loadable in Claude desktop or Pi.
 3. **`mcp/`** — A Node.js MCP server that wraps every agent and skill as a callable tool via the Anthropic API.
 
-## MCP server
+## Package (`mcp/`)
+
+The `mcp/` directory is published as the `claude-agents` npm package. It has two entry points:
+
+| Entry | Purpose |
+|---|---|
+| `claude-agents` (default) | Exports `runAgent()`, `listAgents()`, `listSkills()`, `SLUG_ALIASES`, and all types |
+| `claude-agents/mcp` | MCP server entry — used by the `claude-agents-mcp` bin |
+
+### Build
+
+Agent and skill system prompts are **bundled at build time** by `scripts/bundle-prompts.mjs`, which reads `../agents/*.md` and `../skills/*/SKILL.md` and emits `src/generated/prompts.ts`. The build step runs this automatically:
 
 ```bash
 cd mcp
 npm install
-npm run build          # tsc → dist/
-ANTHROPIC_API_KEY=sk-... npm start   # runs on stdio
+npm run build          # prebuild (bundle-prompts.mjs) + tsc → dist/
 ```
 
-Development without building:
+Adding a new agent or skill requires a rebuild. The `dist/` directory is what gets published — `src/generated/` is gitignored.
+
+### Running the MCP server
+
 ```bash
-ANTHROPIC_API_KEY=sk-... npm run dev   # uses tsx directly
+ANTHROPIC_API_KEY=sk-... npm start   # from compiled dist/
+ANTHROPIC_API_KEY=sk-... npm run dev # via tsx, no build step
 ```
 
-The server auto-discovers agents and skills at startup from `../agents` and `../skills` (overridable via `AGENTS_DIR` / `SKILLS_DIR` env vars). No code changes needed when adding new agents or skills — just restart.
+### Publishing
+
+```bash
+cd mcp
+npm run build   # also runs automatically via prepublishOnly
+npm publish
+```
+
+### Programmatic use (Horus)
+
+```typescript
+import { runAgent } from 'claude-agents';
+
+const { output } = await runAgent('felix-failure-triage', task);
+// or using a short alias:
+const { output } = await runAgent('felix', task);
+```
 
 ## Agent file format (`agents/*.md`)
 
