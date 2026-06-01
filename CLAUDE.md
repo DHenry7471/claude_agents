@@ -25,8 +25,8 @@ Agent and skill system prompts are **bundled at build time** by `scripts/bundle-
 
 ```bash
 cd mcp
-npm install
-npm run build          # prebuild (bundle-prompts.mjs) + tsc → dist/
+pnpm install
+pnpm run build          # prebuild (bundle-prompts.mjs) + tsc → dist/
 ```
 
 Adding a new agent or skill requires a rebuild. The `dist/` directory is what gets published — `src/generated/` is gitignored.
@@ -34,16 +34,16 @@ Adding a new agent or skill requires a rebuild. The `dist/` directory is what ge
 ### Running the MCP server
 
 ```bash
-ANTHROPIC_API_KEY=sk-... npm start   # from compiled dist/
-ANTHROPIC_API_KEY=sk-... npm run dev # via tsx, no build step
+ANTHROPIC_API_KEY=sk-... pnpm start   # from compiled dist/
+ANTHROPIC_API_KEY=sk-... pnpm run dev # via tsx, no build step
 ```
 
 ### Publishing
 
 ```bash
 cd mcp
-npm run build   # also runs automatically via prepublishOnly
-npm publish
+pnpm run build   # also runs automatically via prepublishOnly
+pnpm publish
 ```
 
 ### Programmatic use (Horus)

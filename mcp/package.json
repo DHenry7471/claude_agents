@@ -1,6 +1,6 @@
 {
   "name": "@wutangbanger/claude-agents",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "Quality engineering agents and skills for the Horus platform — bundled as a self-contained npm package",
   "type": "module",
   "main": "./dist/index.js",
@@ -15,7 +15,7 @@
     }
   },
   "bin": {
-    "claude-agents-mcp": "./dist/mcp.js"
+    "claude-agents-mcp": "dist/mcp.js"
   },
   "files": [
     "dist",
@@ -26,7 +26,7 @@
     "build": "tsc",
     "dev": "tsx src/mcp.ts",
     "start": "node dist/mcp.js",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.52.0",
