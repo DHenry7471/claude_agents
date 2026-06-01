@@ -1,7 +1,6 @@
 # claude_agents
 
-A collection of Claude Code agents and skills for quality engineering workflows. Focused on SDET
-tooling — test strategy, API testing, UI automation, accessibility, and CI quality gates.
+Nine specialized Claude Code subagents and five skills that cover the full SDET workflow — test strategy, API and Playwright E2E test generation, coverage gap analysis, CI failure triage, and quality gate implementation. Use them directly in Claude Code, invoke them programmatically via the npm package, or wire them into any MCP-compatible client as tools.
 
 ## Agents
 

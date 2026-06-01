@@ -1,7 +1,7 @@
 {
   "name": "@wutangbanger/claude-agents",
-  "version": "2.0.0",
-  "description": "Quality engineering agents and skills for the Horus platform — bundled as a self-contained npm package",
+  "version": "2.1.0",
+  "description": "9 Claude Code subagents and 5 skills for quality engineering — test strategy, API testing, Playwright E2E, CI quality gates, coverage analysis, and failure triage.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
