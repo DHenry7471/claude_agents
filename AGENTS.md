@@ -6,7 +6,8 @@ the full SDET workflow across the test pyramid.
 ## Structure
 
 ```
-agents/                          # Claude Code subagents (12 total)
+agents/                          # Claude Code subagents (12) — interactive, tool-enabled
+  horus/                         # Horus API variants (5) — JSON-in/JSON-out, no tool calls
 skills/
   testing/                       # Loadable skills (5 total)
     playwright-qa-agent/
@@ -14,10 +15,15 @@ skills/
     api-test-engineer/
     accessibility-auditor/
     ci-quality-gatekeeper/
+shared/
+  contracts/                     # TypeScript I/O types for every Horus agent
+  insight-store/                 # InsightRecord / InsightStore persistence contract
 mcp/                             # npm package: @wutangbanger/claude-agents
 ```
 
 ## Agents
+
+### Standard agents (Claude Code / interactive)
 
 | Agent | Short alias | Purpose |
 |-------|-------------|---------|
@@ -33,6 +39,20 @@ mcp/                             # npm package: @wutangbanger/claude-agents
 | `pat-pact-contract-tester` | `pat` | Generates Pact consumer/provider contract tests and Pact Broker CI pipeline |
 | `furio-forge-test-data` | `furio` | Generates typed faker-backed builder factories from TypeScript types, Zod schemas, or Prisma models |
 | `kurt-striker-mutation-analyst` | `kurt` | Triages Stryker mutation survivors by risk and generates targeted kill tests |
+
+### Horus agents (API / programmatic) — `agents/horus/`
+
+These agents have no tool access. The caller pre-fetches all required data and passes it as a
+serialised JSON object. Each agent returns a single JSON code block conforming to its contract
+in `shared/contracts/`. Call via `runHorusAgent()`.
+
+| Agent | Short alias | Input | Output |
+|-------|-------------|-------|--------|
+| `horus-felix-failure-triage` | `horus-felix` | CI report JSON + git diff + flakiness history | `FelixOutput` — classified failures + merge recommendation |
+| `horus-greta-coverage-analyst` | `horus-greta` | Istanbul/V8 coverage JSON + source summaries | `GretaOutput` — risk-ranked gap list + test stubs |
+| `horus-iris-insight-reporter` | `horus-iris` | Array of CI run records | `IrisOutput` — trends, anomalies, Slack summary, HTML panel |
+| `horus-percy-pr-reviewer` | `horus-percy` | Unified diff string | `PercyOutput` — structured must-fix + recommended inline comments |
+| `horus-kurt-striker-mutation-analyst` | `horus-kurt` | Stryker mutation.json report | `KurtOutput` — kill list + acceptable survivors + projected score |
 
 ## Skills
 

@@ -3,10 +3,14 @@
  * Reads every agent markdown file and every skill SKILL.md, then emits
  * src/generated/prompts.ts with their content as string constants.
  * Run automatically via `npm run build` (prebuild hook).
+ *
+ * Agent directories:
+ *   agents/          — Claude Code subagents (interactive, tool-enabled)
+ *   agents/horus/    — Horus API agents (single-shot, JSON-in/JSON-out, horus:true)
  */
 
 import { createRequire } from 'module';
-import { readFileSync, readdirSync, statSync, writeFileSync, mkdirSync } from 'fs';
+import { readFileSync, readdirSync, statSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join, dirname, basename } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -16,6 +20,7 @@ const matter = require('gray-matter');
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, '../../');
 const agentsDir = join(repoRoot, 'agents');
+const horusAgentsDir = join(agentsDir, 'horus');
 const skillsDir = join(repoRoot, 'skills');
 const outDir = join(__dirname, '../src/generated');
 const outFile = join(outDir, 'prompts.ts');
@@ -24,16 +29,17 @@ const outFile = join(outDir, 'prompts.ts');
 // Helpers
 // ---------------------------------------------------------------------------
 
-function parseAgent(file) {
+function parseAgent(file, { horus = false } = {}) {
   const raw = readFileSync(file, 'utf-8');
   const parsed = matter(raw);
   const fm = parsed.data;
   const slug = basename(file, '.md');
   return {
-    slug,
-    name: fm.name ?? slug,
+    slug: horus ? `horus-${slug}` : slug,
+    name: fm.name ?? (horus ? `horus-${slug}` : slug),
     description: typeof fm.description === 'string' ? fm.description.trim() : String(fm.description ?? '').trim(),
     model: (fm.model && fm.model !== 'inherit') ? fm.model : 'claude-sonnet-4-6',
+    horus: horus || Boolean(fm.horus),
     systemPrompt: parsed.content.trim(),
   };
 }
@@ -51,13 +57,23 @@ function parseSkill(skillMdPath, category, skillName) {
 }
 
 // ---------------------------------------------------------------------------
-// Collect agents
+// Collect agents — flat agents/ first, then agents/horus/
 // ---------------------------------------------------------------------------
 
 const agents = readdirSync(agentsDir)
   .filter(f => f.endsWith('.md'))
   .sort()
   .map(f => parseAgent(join(agentsDir, f)));
+
+// Horus variants — only if the directory exists
+if (existsSync(horusAgentsDir)) {
+  const horusAgents = readdirSync(horusAgentsDir)
+    .filter(f => f.endsWith('.md'))
+    .sort()
+    .map(f => parseAgent(join(horusAgentsDir, f), { horus: true }));
+  agents.push(...horusAgents);
+  console.log(`  found ${horusAgents.length} horus agent(s) in agents/horus/`);
+}
 
 // ---------------------------------------------------------------------------
 // Collect skills

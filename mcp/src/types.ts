@@ -4,6 +4,12 @@ export interface AgentDef {
   description: string;
   model: string;
   systemPrompt: string;
+  /**
+   * True for Horus API variants (agents/horus/).
+   * These agents expect all context pre-packed in the task string and always
+   * return a single JSON code block. Use runHorusAgent() to call them.
+   */
+  horus?: boolean;
 }
 
 export interface SkillDef {
@@ -36,6 +42,20 @@ export interface AgentUsage {
 export interface AgentResult {
   agent: string;
   output: string;
+  model: string;
+  stopReason: string;
+  usage: AgentUsage;
+}
+
+/**
+ * Result from runHorusAgent(). The `data` field is the parsed JSON object
+ * extracted from the agent's fenced code block response.
+ * `rawOutput` is the full text in case you need to debug a parse failure.
+ */
+export interface HorusAgentResult<T = unknown> {
+  agent: string;
+  data: T;
+  rawOutput: string;
   model: string;
   stopReason: string;
   usage: AgentUsage;

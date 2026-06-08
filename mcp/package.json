@@ -1,7 +1,7 @@
 {
   "name": "@wutangbanger/claude-agents",
-  "version": "3.1.1",
-  "description": "12 Claude Code subagents and 5 skills for quality engineering — test strategy, API testing, Playwright E2E, contract testing, mutation analysis, CI quality gates, coverage analysis, and failure triage.",
+  "version": "3.2.0",
+  "description": "12 Claude Code subagents + 5 Horus API agents + 5 skills for quality engineering — test strategy, API testing, Playwright E2E, contract testing, mutation analysis, CI quality gates, coverage analysis, and failure triage.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

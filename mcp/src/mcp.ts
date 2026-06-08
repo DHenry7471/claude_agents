@@ -12,7 +12,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
 import { createRequire } from 'module';
-import { listAgents, listSkills } from './registry.js';
+import { listAgents, listSkills, listHorusAgents } from './registry.js';
 
 const require = createRequire(import.meta.url);
 const { version: PKG_VERSION } = require('../../package.json') as { version: string };
@@ -70,10 +70,14 @@ async function runWithSystemPrompt(
 // Build & start server
 // ---------------------------------------------------------------------------
 
-const agents = listAgents();
+// Standard agents exclude Horus variants (they are registered separately below)
+const agents = listAgents().filter(a => !a.horus);
+const horusAgents = listHorusAgents();
 const skills = listSkills();
 
-console.error(`claude-agents-mcp: ${agents.length} agents, ${skills.length} skills`);
+console.error(
+  `claude-agents-mcp: ${agents.length} agents, ${horusAgents.length} horus agents, ${skills.length} skills`
+);
 
 const server = new McpServer({ name: 'claude-agents-mcp', version: PKG_VERSION });
 
@@ -87,6 +91,47 @@ for (const agent of agents) {
         const text = await runWithSystemPrompt(
           agent.systemPrompt,
           task,
+          model ?? agent.model,
+          max_tokens ?? 8192
+        );
+        return { content: [{ type: 'text', text }] };
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return { content: [{ type: 'text', text: `Error: ${message}` }], isError: true };
+      }
+    }
+  );
+}
+
+// Horus agents — tool description signals that input must be a JSON object
+const HorusInput = z.object({
+  input: z.string().describe(
+    'JSON-serialised input object matching the agent\'s contract. ' +
+    'See shared/contracts/ for the TypeScript type definitions.'
+  ),
+  model: z.string().optional().describe('Model override.'),
+  max_tokens: z.number().int().positive().optional().describe('Max tokens (default: 8192).'),
+});
+
+for (const agent of horusAgents) {
+  server.tool(
+    agent.slug,
+    `[Horus Agent] ${agent.description}`,
+    HorusInput.shape,
+    async ({ input, model, max_tokens }) => {
+      try {
+        let parsed: unknown;
+        try {
+          parsed = JSON.parse(input);
+        } catch {
+          return {
+            content: [{ type: 'text', text: 'Error: `input` must be a valid JSON string.' }],
+            isError: true,
+          };
+        }
+        const text = await runWithSystemPrompt(
+          agent.systemPrompt,
+          JSON.stringify(parsed, null, 2),
           model ?? agent.model,
           max_tokens ?? 8192
         );

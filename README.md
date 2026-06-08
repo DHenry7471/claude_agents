@@ -1,6 +1,12 @@
 # claude_agents
 
-Twelve specialized Claude Code subagents and five skills that cover the full SDET workflow — test strategy, API and Playwright E2E test generation, contract testing, test data factories, mutation analysis, coverage gap analysis, CI failure triage, and quality gate implementation. Use them directly in Claude Code, invoke them programmatically via the npm package, or wire them into any MCP-compatible client as tools.
+Twelve Claude Code subagents, five Horus API agents, and five skills covering the full SDET workflow — test strategy, API and Playwright E2E test generation, contract testing, test data factories, mutation analysis, coverage gap analysis, CI failure triage, and quality gate implementation.
+
+Use them directly in Claude Code, invoke them programmatically via the npm package, or wire them into any MCP-compatible client as tools.
+
+**Two agent tiers:**
+- **Standard agents** (`agents/`) — interactive, tool-enabled, for developers in the terminal
+- **Horus agents** (`agents/horus/`) — API-only, JSON-in / JSON-out, for automation pipelines. Call with `runHorusAgent()`.
 
 ## Agents
 
@@ -134,6 +140,25 @@ Distinguishes high-value kills (business logic, auth, validation) from acceptabl
 (logging, trivial getters). Projects the new mutation score after kills.
 
 **File:** `agents/kurt-striker-mutation-analyst.md` | **Color:** red
+
+---
+
+## Horus Agents
+
+Five agents in `agents/horus/` are designed for Horus automation pipelines. They require no
+tool access — the calling code pre-fetches all data and passes it as a JSON-serialised input
+object. They always return a single JSON code block.
+
+| Agent | Short alias | Contract |
+|-------|-------------|---------|
+| `horus-felix-failure-triage` | `horus-felix` | `FelixInput` → `FelixOutput` |
+| `horus-greta-coverage-analyst` | `horus-greta` | `GretaInput` → `GretaOutput` |
+| `horus-iris-insight-reporter` | `horus-iris` | `IrisInput` → `IrisOutput` |
+| `horus-percy-pr-reviewer` | `horus-percy` | `PercyInput` → `PercyOutput` |
+| `horus-kurt-striker-mutation-analyst` | `horus-kurt` | `KurtInput` → `KurtOutput` |
+
+TypeScript types for all inputs and outputs live in `shared/contracts/`. The `InsightRecord`
+persistence schema lives in `shared/insight-store/`.
 
 ---
 
@@ -308,12 +333,29 @@ The `mcp/` directory is published as **[`@wutangbanger/claude-agents`](https://w
 npm install @wutangbanger/claude-agents
 ```
 
+**Standard agents** — returns markdown prose in `output`:
 ```typescript
-import { runAgent, listAgents } from '@wutangbanger/claude-agents';
+import { runAgent } from '@wutangbanger/claude-agents';
 
-// Full slug or short alias
 const { output } = await runAgent('felix-failure-triage', task);
-const { output } = await runAgent('felix', task);
+const { output } = await runAgent('felix', task); // short alias
+```
+
+**Horus agents** — accepts a typed input object, returns parsed JSON in `data`:
+```typescript
+import { runHorusAgent } from '@wutangbanger/claude-agents';
+import type { FelixInput, FelixOutput } from '@wutangbanger/claude-agents/contracts';
+
+const input: FelixInput = {
+  ciReport: vitestJsonReport,
+  gitDiff: 'src/orders/orderService.ts\ntests/orders/orderService.test.ts',
+  branch: 'feat/payment-refactor',
+  runId: '12345',
+};
+
+const { data } = await runHorusAgent<FelixOutput>('horus-felix', input);
+// data.mergeRecommendation === 'BLOCK' | 'ALLOW'
+// data.failures[0].classification === 'REGRESSION' | 'FLAKY' | ...
 ```
 
 Reads `ANTHROPIC_API_KEY` from the environment. Override per-call via `options.apiKey`.
@@ -340,30 +382,36 @@ Or add to `.mcp.json` / `claude_desktop_config.json`:
 
 ### Registered tools
 
-| Tool                                  | Type    |
-|---------------------------------------|---------|
-| `tessa-test-strategist`               | Agent   |
-| `ambrosine-api-tester`                | Agent   |
-| `ernie-e2e-test-writer`               | Agent   |
-| `clint-ci-gatekeeper`                 | Agent   |
-| `felix-failure-triage`                | Agent   |
-| `greta-coverage-analyst`              | Agent   |
-| `iris-insight-reporter`               | Agent   |
-| `percy-pr-reviewer`                   | Agent   |
-| `saxon-spec-to-test`                  | Agent   |
-| `pat-pact-contract-tester`            | Agent   |
-| `furio-forge-test-data`               | Agent   |
-| `kurt-striker-mutation-analyst`       | Agent   |
-| `skill-testing-test-architect`        | Skill   |
-| `skill-testing-api-test-engineer`     | Skill   |
-| `skill-testing-accessibility-auditor` | Skill   |
-| `skill-testing-ci-quality-gatekeeper` | Skill   |
-| `skill-testing-playwright-qa-agent`   | Skill   |
-| `list-agents-and-skills`              | Utility |
+Standard agents and skills accept `task` (string), `model?`, `max_tokens?`.
+Horus agents accept `input` (JSON string per contract), `model?`, `max_tokens?`.
 
-Every tool accepts: `task` (string, required), `model` (optional override), `max_tokens` (optional, default 8192).
+| Tool                                        | Type         |
+|---------------------------------------------|--------------|
+| `tessa-test-strategist`                     | Agent        |
+| `ambrosine-api-tester`                      | Agent        |
+| `ernie-e2e-test-writer`                     | Agent        |
+| `clint-ci-gatekeeper`                       | Agent        |
+| `felix-failure-triage`                      | Agent        |
+| `greta-coverage-analyst`                    | Agent        |
+| `iris-insight-reporter`                     | Agent        |
+| `percy-pr-reviewer`                         | Agent        |
+| `saxon-spec-to-test`                        | Agent        |
+| `pat-pact-contract-tester`                  | Agent        |
+| `furio-forge-test-data`                     | Agent        |
+| `kurt-striker-mutation-analyst`             | Agent        |
+| `horus-felix-failure-triage`                | Horus Agent  |
+| `horus-greta-coverage-analyst`              | Horus Agent  |
+| `horus-iris-insight-reporter`               | Horus Agent  |
+| `horus-percy-pr-reviewer`                   | Horus Agent  |
+| `horus-kurt-striker-mutation-analyst`       | Horus Agent  |
+| `skill-testing-test-architect`              | Skill        |
+| `skill-testing-api-test-engineer`           | Skill        |
+| `skill-testing-accessibility-auditor`       | Skill        |
+| `skill-testing-ci-quality-gatekeeper`       | Skill        |
+| `skill-testing-playwright-qa-agent`         | Skill        |
+| `list-agents-and-skills`                    | Utility      |
 
-Adding or editing agents/skills requires rebuilding and republishing the package (`npm run build && npm publish --access public` from `mcp/`).
+Adding or editing agents/skills requires rebuilding and republishing the package (`pnpm run build && pnpm publish --access public` from `mcp/`).
 
 ---
 
@@ -387,48 +435,54 @@ with `/skill:<name>`.
 .pi/
   settings.json               # Pi config
 AGENTS.md                     # Repo context for Pi and other coding agents
-agents/
+agents/                        # Standard Claude Code subagents (interactive, tool-enabled)
   tessa-test-strategist.md    # Test strategy designer
   ambrosine-api-tester.md     # API test suite generator
   ernie-e2e-test-writer.md    # Playwright E2E spec writer
   clint-ci-gatekeeper.md      # CI/CD quality gate implementer
   felix-failure-triage.md     # CI failure classifier and triage reporter
   greta-coverage-analyst.md   # Risk-ranked coverage gap analyst
-  iris-insight-reporter.md    # CI history quality health reporter (JSON + HTML + plain-text)
+  iris-insight-reporter.md    # CI history quality health reporter
   percy-pr-reviewer.md        # Test code PR reviewer (10 standards enforced)
   saxon-spec-to-test.md       # Spec-to-test scaffold generator
-  pat-pact-contract-tester.md     # Consumer-driven contract tests via Pact
-  furio-forge-test-data.md        # Test fixture and builder factory generator
-  kurt-striker-mutation-analyst.md # Stryker mutation report analyst and kill-test generator
-mcp/                          # Published as @wutangbanger/claude-agents
+  pat-pact-contract-tester.md # Consumer-driven contract tests via Pact
+  furio-forge-test-data.md    # Test fixture and builder factory generator
+  kurt-striker-mutation-analyst.md # Stryker mutation report analyst
+  horus/                       # Horus API variants (JSON-in/JSON-out, no tool calls)
+    felix-failure-triage.md   # FelixInput → FelixOutput
+    greta-coverage-analyst.md # GretaInput → GretaOutput
+    iris-insight-reporter.md  # IrisInput  → IrisOutput
+    percy-pr-reviewer.md      # PercyInput → PercyOutput
+    kurt-striker-mutation-analyst.md # KurtInput → KurtOutput
+shared/                        # TypeScript contracts — source of truth for Horus I/O types
+  contracts/
+    felix.ts                  # FelixInput, FelixOutput
+    greta.ts                  # GretaInput, GretaOutput
+    iris.ts                   # IrisInput, IrisOutput
+    percy.ts                  # PercyInput, PercyOutput
+    kurt.ts                   # KurtInput, KurtOutput
+    index.ts                  # barrel export
+  insight-store/
+    schema.ts                 # InsightRecord, InsightStore, InsightQuery
+    index.ts                  # barrel export
+mcp/                           # Published as @wutangbanger/claude-agents
   scripts/
-    bundle-prompts.mjs        # Prebuild: reads agents/ + skills/, emits src/generated/prompts.ts
+    bundle-prompts.mjs        # Prebuild: reads agents/ + agents/horus/ + skills/
   src/
-    index.ts                  # Package entry: exports runAgent(), listAgents(), types
-    api.ts                    # runAgent() implementation (Anthropic SDK)
-    registry.ts               # Lookup/list over bundled prompts + SLUG_ALIASES
-    types.ts                  # Shared interfaces (AgentDef, AgentResult, AgentOptions, …)
-    mcp.ts                    # MCP server entry point (bin: claude-agents-mcp)
+    index.ts                  # Exports runAgent(), runHorusAgent(), listHorusAgents(), types
+    api.ts                    # runAgent() + runHorusAgent() (Anthropic SDK)
+    registry.ts               # Lookup/list + SLUG_ALIASES (includes horus-* aliases)
+    types.ts                  # AgentDef (horus?: bool), AgentResult, HorusAgentResult, …
+    mcp.ts                    # MCP server — registers standard + horus + skill tools
     generated/                # Auto-generated by bundle-prompts.mjs — gitignored
-  package.json
+  package.json                # version 3.2.0
   tsconfig.json
   README.md
 skills/
   testing/
     test-architect/
-      SKILL.md
     api-test-engineer/
-      SKILL.md
     accessibility-auditor/
-      SKILL.md
     ci-quality-gatekeeper/
-      SKILL.md
     playwright-qa-agent/
-      SKILL.md
-      scripts/
-    test-architect.skill
-    api-test-engineer.skill
-    accessibility-auditor.skill
-    ci-quality-gatekeeper.skill
-    playwright-qa-agent.skill
 ```

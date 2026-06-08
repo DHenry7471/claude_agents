@@ -1,20 +1,31 @@
 import { BUNDLED_AGENTS, BUNDLED_SKILLS } from './generated/prompts.js';
 import type { AgentDef, SkillDef } from './types.js';
 
-/** Short aliases used in Horus npm scripts (e.g. "felix" → "felix-failure-triage"). */
+/**
+ * Short aliases for agents.
+ * Standard agents: "felix" → "felix-failure-triage"
+ * Horus variants:  "horus-felix" → "horus-felix-failure-triage"
+ */
 export const SLUG_ALIASES: Readonly<Record<string, string>> = {
-  felix: 'felix-failure-triage',
-  greta: 'greta-coverage-analyst',
-  iris: 'iris-insight-reporter',
-  percy: 'percy-pr-reviewer',
-  saxon: 'saxon-spec-to-test',
-  tessa: 'tessa-test-strategist',
-  clint: 'clint-ci-gatekeeper',
+  // Standard Claude Code agents
+  felix:     'felix-failure-triage',
+  greta:     'greta-coverage-analyst',
+  iris:      'iris-insight-reporter',
+  percy:     'percy-pr-reviewer',
+  saxon:     'saxon-spec-to-test',
+  tessa:     'tessa-test-strategist',
+  clint:     'clint-ci-gatekeeper',
   ambrosine: 'ambrosine-api-tester',
-  ernie: 'ernie-e2e-test-writer',
-  pat: 'pat-pact-contract-tester',
-  furio: 'furio-forge-test-data',
-  kurt: 'kurt-striker-mutation-analyst',
+  ernie:     'ernie-e2e-test-writer',
+  pat:       'pat-pact-contract-tester',
+  furio:     'furio-forge-test-data',
+  kurt:      'kurt-striker-mutation-analyst',
+  // Horus API variants
+  'horus-felix': 'horus-felix-failure-triage',
+  'horus-greta': 'horus-greta-coverage-analyst',
+  'horus-iris':  'horus-iris-insight-reporter',
+  'horus-percy': 'horus-percy-pr-reviewer',
+  'horus-kurt':  'horus-kurt-striker-mutation-analyst',
 };
 
 const agentMap = new Map<string, AgentDef>(
@@ -33,8 +44,14 @@ export function lookupSkill(slug: string): SkillDef | undefined {
   return skillMap.get(slug);
 }
 
+/** All bundled agents (standard + Horus variants). */
 export function listAgents(): AgentDef[] {
   return BUNDLED_AGENTS;
+}
+
+/** Only Horus API variant agents (horus: true). */
+export function listHorusAgents(): AgentDef[] {
+  return BUNDLED_AGENTS.filter(a => a.horus === true);
 }
 
 export function listSkills(): SkillDef[] {
