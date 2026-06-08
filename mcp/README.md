@@ -77,6 +77,9 @@ Adding or editing agents/skills requires a rebuild before the changes appear in 
 | `clint-ci-gatekeeper` | `clint` | CI/CD quality gate implementation |
 | `ambrosine-api-tester` | `ambrosine` | Generate API test suites |
 | `ernie-e2e-test-writer` | `ernie` | Write Playwright E2E specs |
+| `pat-pact-contract-tester` | `pat` | Consumer-driven contract tests via Pact |
+| `furio-forge-test-data` | `furio` | Generate typed test fixture builders |
+| `kurt-striker-mutation-analyst` | `kurt` | Interpret Stryker mutation reports |
 
 ## Environment variables
 
