@@ -12,6 +12,9 @@ export const SLUG_ALIASES: Readonly<Record<string, string>> = {
   clint: 'clint-ci-gatekeeper',
   ambrosine: 'ambrosine-api-tester',
   ernie: 'ernie-e2e-test-writer',
+  pat: 'pat-pact-contract-tester',
+  furio: 'furio-forge-test-data',
+  kurt: 'kurt-striker-mutation-analyst',
 };
 
 const agentMap = new Map<string, AgentDef>(

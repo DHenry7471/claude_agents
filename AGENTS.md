@@ -1,24 +1,38 @@
 # claude_agents
 
-A collection of Claude/Pi-compatible skills for quality engineering workflows, focused on SDET
-tooling across the full test pyramid.
+A collection of Claude Code subagents and skills for quality engineering workflows, covering
+the full SDET workflow across the test pyramid.
 
 ## Structure
 
 ```
-.pi/
-  settings.json               # Pi config (provider, model, skill paths)
+agents/                          # Claude Code subagents (12 total)
 skills/
-  testing/
-    playwright-qa-agent/      # Full-site UI QA agent (Playwright)
-    test-architect/           # Test strategy and coverage design
-    api-test-engineer/        # REST/GraphQL API test generation
-    accessibility-auditor/    # WCAG 2.1/2.2 audit + axe-core tests
-    ci-quality-gatekeeper/    # CI/CD quality gate design and implementation
+  testing/                       # Loadable skills (5 total)
+    playwright-qa-agent/
+    test-architect/
+    api-test-engineer/
+    accessibility-auditor/
+    ci-quality-gatekeeper/
+mcp/                             # npm package: @wutangbanger/claude-agents
 ```
 
-Each skill directory contains a `SKILL.md` with `name` and `description` frontmatter per the
-[Agent Skills standard](https://agentskills.io/specification).
+## Agents
+
+| Agent | Short alias | Purpose |
+|-------|-------------|---------|
+| `tessa-test-strategist` | `tessa` | Designs test strategies across the full pyramid; produces `TEST_STRATEGY.md` |
+| `ambrosine-api-tester` | `ambrosine` | Generates TypeScript REST/GraphQL test suites with mocked deps and schema validation |
+| `ernie-e2e-test-writer` | `ernie` | Writes Playwright E2E spec files using Page Object Model; adds axe-core a11y tests |
+| `clint-ci-gatekeeper` | `clint` | Designs and implements CI/CD quality gates for GitHub Actions and equivalents |
+| `felix-failure-triage` | `felix` | Classifies CI failures as regressions, flaky, env noise, or test bugs; recommends merge-block |
+| `greta-coverage-analyst` | `greta` | Ranks uncovered business logic by risk from V8 reports; produces gap report with test stubs |
+| `iris-insight-reporter` | `iris` | Produces quality health JSON, dashboard HTML, and Slack summary from CI run history |
+| `percy-pr-reviewer` | `percy` | Reviews test diffs against 10 standards; posts must-fix and recommended inline comments |
+| `saxon-spec-to-test` | `saxon` | Converts ADRs, issues, or user stories into Vitest test scaffolds with AAA stubs |
+| `pat-pact-contract-tester` | `pat` | Generates Pact consumer/provider contract tests and Pact Broker CI pipeline |
+| `furio-forge-test-data` | `furio` | Generates typed faker-backed builder factories from TypeScript types, Zod schemas, or Prisma models |
+| `kurt-striker-mutation-analyst` | `kurt` | Triages Stryker mutation survivors by risk and generates targeted kill tests |
 
 ## Skills
 
@@ -32,15 +46,15 @@ Each skill directory contains a `SKILL.md` with `name` and `description` frontma
 
 ## Conventions
 
-- Skill names: lowercase, hyphenated
-- Every skill directory must contain `SKILL.md` with `name` and `description` frontmatter
 - Test code follows AAA (Arrange-Act-Assert) pattern
+- Given/When/Then naming for test descriptions
+- Test pyramid: maximize unit, then mocked integration, minimize E2E
 - Integration tests mock all external dependencies — no live services
-- Follow the test pyramid: maximize unit, then integration (mocked), minimize E2E
+- Treat test code as production code: OOP patterns, no logic in tests
 
 ## Provider
 
-Anthropic Claude. Set `ANTHROPIC_API_KEY` before running Pi.
+Anthropic Claude. Set `ANTHROPIC_API_KEY` before running.
 
 ## Running Pi
 

@@ -11,7 +11,11 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
+import { createRequire } from 'module';
 import { listAgents, listSkills } from './registry.js';
+
+const require = createRequire(import.meta.url);
+const { version: PKG_VERSION } = require('../../package.json') as { version: string };
 
 const apiKey = process.env.ANTHROPIC_API_KEY;
 if (!apiKey) {
@@ -71,7 +75,7 @@ const skills = listSkills();
 
 console.error(`claude-agents-mcp: ${agents.length} agents, ${skills.length} skills`);
 
-const server = new McpServer({ name: 'claude-agents-mcp', version: '1.0.0' });
+const server = new McpServer({ name: 'claude-agents-mcp', version: PKG_VERSION });
 
 for (const agent of agents) {
   server.tool(
@@ -105,7 +109,7 @@ for (const skill of skills) {
         const text = await runWithSystemPrompt(
           skill.systemPrompt,
           task,
-          model ?? 'claude-sonnet-4-6',
+          model ?? process.env.CLAUDE_AGENTS_MODEL ?? 'claude-sonnet-4-6',
           max_tokens ?? 8192
         );
         return { content: [{ type: 'text', text }] };

@@ -1,6 +1,6 @@
 # claude_agents
 
-Nine specialized Claude Code subagents and five skills that cover the full SDET workflow — test strategy, API and Playwright E2E test generation, coverage gap analysis, CI failure triage, and quality gate implementation. Use them directly in Claude Code, invoke them programmatically via the npm package, or wire them into any MCP-compatible client as tools.
+Twelve specialized Claude Code subagents and five skills that cover the full SDET workflow — test strategy, API and Playwright E2E test generation, contract testing, test data factories, mutation analysis, coverage gap analysis, CI failure triage, and quality gate implementation. Use them directly in Claude Code, invoke them programmatically via the npm package, or wire them into any MCP-compatible client as tools.
 
 ## Agents
 
@@ -72,21 +72,24 @@ concrete test stubs for every CRITICAL and HIGH gap.
 
 Interprets CI run history data and produces a concise quality health summary for
 the Horus dashboard. Detects pass rate trends, coverage drift, pyramid imbalance,
-and anomalies. Returns an embeddable HTML snippet (for the dashboard panel) and a
-plain-text summary (for Slack or PR comments).
+and anomalies. Returns a structured JSON payload (for programmatic consumption),
+an embeddable HTML snippet (for the dashboard panel), and a plain-text summary
+(for Slack or PR comments).
 
-**File:** `agents/iris-insight-reporter.md` | **Color:** blue
+**File:** `agents/iris-insight-reporter.md` | **Color:** blue | **Model:** haiku
 
 ---
 
 ### percy-pr-reviewer
 
-Reviews pull request diffs touching test files and enforces quality engineering
+Reviews pull request diffs touching test files and enforces ten quality engineering
 standards: AAA pattern, given/when/then naming, pyramid layer compliance, mock
-injection via `@horus/test-utils`, test isolation, and no logic in tests. Posts
-structured inline review comments with must-fix and recommended categories.
+injection via `@horus/test-utils`, test isolation, no logic in tests, no hardcoded
+waits, behavior-not-implementation assertions, assertion completeness, and test count
+regression detection. Posts structured inline review comments with must-fix and
+recommended categories.
 
-**File:** `agents/percy-pr-reviewer.md` | **Color:** pink
+**File:** `agents/percy-pr-reviewer.md` | **Color:** pink | **Model:** haiku | **Tools:** Read, Glob, Grep
 
 ---
 
@@ -98,6 +101,39 @@ and builders. Assigns each scenario to the right pyramid layer and generates
 complete files with AAA stubs ready to fill in.
 
 **File:** `agents/saxon-spec-to-test.md` | **Color:** purple
+
+---
+
+### pat-pact-contract-tester
+
+Designs and implements consumer-driven contract tests using Pact for microservice boundaries.
+Generates consumer pact files, provider verification tests, and a Pact Broker CI pipeline with
+`can-i-deploy` gates. Identifies which service boundaries lack contract coverage and are at risk
+of silent breakage.
+
+**File:** `agents/pat-pact-contract-tester.md` | **Color:** purple
+
+---
+
+### furio-forge-test-data
+
+Generates realistic, schema-compliant test fixtures and typed builder factories. Reads TypeScript
+types, Zod/Joi schemas, Prisma models, or OpenAPI specs and produces a `faker`-backed builder
+library with sensible defaults and per-test override support. Eliminates raw object literals
+scattered across test files.
+
+**File:** `agents/furio-forge-test-data.md` | **Color:** orange
+
+---
+
+### kurt-striker-mutation-analyst
+
+Interprets Stryker mutation testing reports, triages surviving mutants by risk (CRITICAL / HIGH /
+LOW), and generates the minimal set of targeted tests needed to kill the most dangerous survivors.
+Distinguishes high-value kills (business logic, auth, validation) from acceptable survivors
+(logging, trivial getters). Projects the new mutation score after kills.
+
+**File:** `agents/kurt-striker-mutation-analyst.md` | **Color:** red
 
 ---
 
@@ -315,6 +351,9 @@ Or add to `.mcp.json` / `claude_desktop_config.json`:
 | `iris-insight-reporter`               | Agent   |
 | `percy-pr-reviewer`                   | Agent   |
 | `saxon-spec-to-test`                  | Agent   |
+| `pat-pact-contract-tester`            | Agent   |
+| `furio-forge-test-data`               | Agent   |
+| `kurt-striker-mutation-analyst`       | Agent   |
 | `skill-testing-test-architect`        | Skill   |
 | `skill-testing-api-test-engineer`     | Skill   |
 | `skill-testing-accessibility-auditor` | Skill   |
@@ -355,9 +394,12 @@ agents/
   clint-ci-gatekeeper.md      # CI/CD quality gate implementer
   felix-failure-triage.md     # CI failure classifier and triage reporter
   greta-coverage-analyst.md   # Risk-ranked coverage gap analyst
-  iris-insight-reporter.md    # CI history quality health reporter
-  percy-pr-reviewer.md        # Test code PR reviewer
+  iris-insight-reporter.md    # CI history quality health reporter (JSON + HTML + plain-text)
+  percy-pr-reviewer.md        # Test code PR reviewer (10 standards enforced)
   saxon-spec-to-test.md       # Spec-to-test scaffold generator
+  pat-pact-contract-tester.md     # Consumer-driven contract tests via Pact
+  furio-forge-test-data.md        # Test fixture and builder factory generator
+  kurt-striker-mutation-analyst.md # Stryker mutation report analyst and kill-test generator
 mcp/                          # Published as @wutangbanger/claude-agents
   scripts/
     bundle-prompts.mjs        # Prebuild: reads agents/ + skills/, emits src/generated/prompts.ts

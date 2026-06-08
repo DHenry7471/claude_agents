@@ -4,9 +4,9 @@ description: >
   Writes production-ready Playwright E2E spec files for an existing test project. Reads the
   project's CLAUDE.md and TEST_PLAN.md to discover conventions and pending test cases, generates
   missing TypeScript spec files following the Page Object Model, then layers in axe-core
-  accessibility tests using the accessibility-auditor skill. Use this agent when asked to write
-  missing specs, fill in a test plan, add a11y coverage to an existing Playwright suite, or
-  generate tests for a specific feature or user flow.
+  accessibility tests inline. Use this agent when asked to write missing specs, fill in a test
+  plan, add a11y coverage to an existing Playwright suite, or generate tests for a specific
+  feature or user flow.
 model: inherit
 color: cyan
 tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
@@ -48,13 +48,23 @@ For each missing spec, apply the project's conventions precisely:
 
 ## Phase 3 — Accessibility layer
 
-After writing functional specs, invoke the **accessibility-auditor** skill to:
+After writing functional specs, add axe-core accessibility tests inline:
 
 1. Generate an `axe-core` test block for each major page/view under test
 2. Use `axe-playwright` with `wcag2a`, `wcag2aa`, and `wcag21aa` tags
 3. Add a11y assertions inside the relevant spec files (or a dedicated `accessibility.spec.ts`)
 4. Flag any manual-check items (color contrast, focus order, screen reader labels) as
    `test.skip` with a `// MANUAL:` comment explaining what to verify
+
+**Required manual checks** (axe cannot catch these automatically):
+
+| Check | WCAG Criterion |
+|-------|---------------|
+| Keyboard tab order is logical | 2.4.3 |
+| Focus indicator is visible | 2.4.7 / 2.4.11 |
+| Color is not the only means of conveying info | 1.4.1 |
+| Error messages identify the field by name | 3.3.1 |
+| Labels are programmatically associated | 1.3.1 |
 
 ```typescript
 import { checkA11y, injectAxe } from 'axe-playwright';

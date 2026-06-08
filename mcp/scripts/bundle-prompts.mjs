@@ -56,6 +56,7 @@ function parseSkill(skillMdPath, category, skillName) {
 
 const agents = readdirSync(agentsDir)
   .filter(f => f.endsWith('.md'))
+  .sort()
   .map(f => parseAgent(join(agentsDir, f)));
 
 // ---------------------------------------------------------------------------
@@ -67,7 +68,7 @@ for (const category of readdirSync(skillsDir)) {
   const categoryPath = join(skillsDir, category);
   if (!statSync(categoryPath).isDirectory()) continue;
 
-  for (const skillName of readdirSync(categoryPath)) {
+  for (const skillName of readdirSync(categoryPath).sort()) {
     if (skillName.endsWith('.skill')) continue;
     const skillPath = join(categoryPath, skillName);
     if (!statSync(skillPath).isDirectory()) continue;

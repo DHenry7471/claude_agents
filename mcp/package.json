@@ -1,7 +1,7 @@
 {
   "name": "@wutangbanger/claude-agents",
-  "version": "2.1.0",
-  "description": "9 Claude Code subagents and 5 skills for quality engineering — test strategy, API testing, Playwright E2E, CI quality gates, coverage analysis, and failure triage.",
+  "version": "3.0.0",
+  "description": "12 Claude Code subagents and 5 skills for quality engineering — test strategy, API testing, Playwright E2E, contract testing, mutation analysis, CI quality gates, coverage analysis, and failure triage.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -22,11 +22,11 @@
     "README.md"
   ],
   "scripts": {
-    "prebuild": "node scripts/bundle-prompts.mjs",
-    "build": "tsc",
+    "bundle": "node scripts/bundle-prompts.mjs",
+    "build": "node scripts/bundle-prompts.mjs && tsc",
     "dev": "tsx src/mcp.ts",
     "start": "node dist/mcp.js",
-    "prepublishOnly": "pnpm run build"
+    "prepublishOnly": "node scripts/bundle-prompts.mjs && tsc"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.52.0",
@@ -40,6 +40,8 @@
     "typescript": "^5.8.0"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.0.0",
+    "npm": ">=9.0.0",
+    "pnpm": ">=8.0.0"
   }
 }

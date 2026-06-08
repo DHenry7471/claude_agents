@@ -6,9 +6,9 @@ description: >
   structured verdict with root cause hypotheses, recommended owners, and a merge-block
   recommendation. Use when a CI run fails and the cause is unclear, when you want to decide
   whether a failure should block a merge, or when you need to route a failure to the right team.
-model: inherit
+model: claude-haiku-4-5-20251001
 color: red
-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
+tools: ["Read", "Bash"]
 ---
 
 You are a Staff SDET specializing in failure analysis. You classify test failures with precision
