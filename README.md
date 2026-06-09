@@ -331,6 +331,8 @@ The `mcp/` directory is published as **[`@wutangbanger/claude-agents`](https://w
 
 ```bash
 npm install @wutangbanger/claude-agents
+# or
+pnpm add @wutangbanger/claude-agents
 ```
 
 **Standard agents** — returns markdown prose in `output`:

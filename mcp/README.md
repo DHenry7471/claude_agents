@@ -1,16 +1,22 @@
-# claude-agents
+# @wutangbanger/claude-agents
 
-Quality engineering agents and skills for the Horus platform — published as a self-contained npm package. Agent system prompts are bundled at build time, so no external file paths or `CLAUDE_AGENTS_DIR` are needed.
+12 Claude Code subagents + 5 Horus API agents + 5 skills for quality engineering — test strategy, API testing, Playwright E2E, contract testing, mutation analysis, CI quality gates, coverage analysis, and failure triage.
+
+Agent and skill system prompts are bundled at build time. No file paths or `CLAUDE_AGENTS_DIR` needed.
 
 ## Install
 
 ```bash
 npm install @wutangbanger/claude-agents
-# or while the package is local:
-npm install file:../claude_agents/mcp
+# or
+pnpm add @wutangbanger/claude-agents
 ```
 
 ## Programmatic use
+
+### Standard agents
+
+Returns markdown prose in `output`:
 
 ```typescript
 import { runAgent, listAgents } from '@wutangbanger/claude-agents';
@@ -25,18 +31,37 @@ const { output } = await runAgent('tessa', task, {
   maxTokens: 16384,
 });
 
-// List all bundled agents
 const agents = listAgents();
+```
+
+### Horus agents
+
+Accepts a typed input object, returns parsed JSON in `data`:
+
+```typescript
+import { runHorusAgent, listHorusAgents } from '@wutangbanger/claude-agents';
+import type { FelixInput, FelixOutput } from '@wutangbanger/claude-agents/contracts';
+
+const input: FelixInput = {
+  ciReport: vitestJsonReport,
+  gitDiff: 'src/orders/orderService.ts\ntests/orders/orderService.test.ts',
+  branch: 'feat/payment-refactor',
+  runId: '12345',
+};
+
+const { data } = await runHorusAgent<FelixOutput>('horus-felix', input);
+// data.mergeRecommendation === 'BLOCK' | 'ALLOW'
+// data.failures[0].classification === 'REGRESSION' | 'FLAKY' | ...
 ```
 
 Reads `ANTHROPIC_API_KEY` from the environment. Override per-call via `options.apiKey`.
 
 ## MCP server
 
-Run the bundled agents as MCP tools (for Claude Code / IDE integration):
+Run all agents and skills as MCP tools (for Claude Code / IDE integration):
 
 ```bash
-ANTHROPIC_API_KEY=sk-... npx claude-agents-mcp
+ANTHROPIC_API_KEY=sk-... npx @wutangbanger/claude-agents
 ```
 
 Add to `.mcp.json` or `claude_desktop_config.json`:
@@ -46,7 +71,7 @@ Add to `.mcp.json` or `claude_desktop_config.json`:
   "mcpServers": {
     "claude-agents": {
       "command": "npx",
-      "args": ["claude-agents-mcp"],
+      "args": ["@wutangbanger/claude-agents"],
       "env": { "ANTHROPIC_API_KEY": "sk-..." }
     }
   }
@@ -58,32 +83,68 @@ Add to `.mcp.json` or `claude_desktop_config.json`:
 Agent and skill prompts are bundled at build time from `../agents/` and `../skills/`:
 
 ```bash
-npm run build   # runs bundle-prompts.mjs then tsc
-npm run dev     # tsx src/mcp.ts — no build step needed
+pnpm run build   # bundle-prompts.mjs + tsc → dist/
+pnpm run dev     # tsx src/mcp.ts — no build step needed
 ```
 
-Adding or editing agents/skills requires a rebuild before the changes appear in the package.
+Adding or editing agents/skills requires a rebuild before the changes appear.
 
 ## Bundled agents
 
+### Standard agents
+
 | Slug | Alias | Purpose |
 |------|-------|---------|
-| `felix-failure-triage` | `felix` | Triage CI test failures |
-| `greta-coverage-analyst` | `greta` | Risk-ranked coverage gap analysis |
-| `iris-insight-reporter` | `iris` | Quality health summary for the dashboard |
-| `percy-pr-reviewer` | `percy` | Review test-file PRs |
-| `saxon-spec-to-test` | `saxon` | Convert specs/issues into test scaffolds |
-| `tessa-test-strategist` | `tessa` | Design test strategies |
-| `clint-ci-gatekeeper` | `clint` | CI/CD quality gate implementation |
-| `ambrosine-api-tester` | `ambrosine` | Generate API test suites |
-| `ernie-e2e-test-writer` | `ernie` | Write Playwright E2E specs |
+| `tessa-test-strategist` | `tessa` | Design test strategies across the full pyramid |
+| `ambrosine-api-tester` | `ambrosine` | Generate TypeScript REST/GraphQL test suites |
+| `ernie-e2e-test-writer` | `ernie` | Write Playwright E2E specs with Page Object Model |
+| `clint-ci-gatekeeper` | `clint` | Implement CI/CD quality gates for GitHub Actions |
+| `felix-failure-triage` | `felix` | Triage CI test failures (regression / flaky / env / test bug) |
+| `greta-coverage-analyst` | `greta` | Risk-ranked coverage gap analysis from V8 reports |
+| `iris-insight-reporter` | `iris` | Quality health summary for dashboards and Slack |
+| `percy-pr-reviewer` | `percy` | Review test diffs against 10 QE standards |
+| `saxon-spec-to-test` | `saxon` | Convert specs/issues/ADRs into Vitest test scaffolds |
 | `pat-pact-contract-tester` | `pat` | Consumer-driven contract tests via Pact |
-| `furio-forge-test-data` | `furio` | Generate typed test fixture builders |
-| `kurt-striker-mutation-analyst` | `kurt` | Interpret Stryker mutation reports |
+| `furio-forge-test-data` | `furio` | Generate typed faker-backed builder factories |
+| `kurt-striker-mutation-analyst` | `kurt` | Interpret Stryker mutation reports and generate kill tests |
+
+### Horus agents (API / programmatic)
+
+No tool access — caller pre-fetches all data and passes it as a JSON input object. Always returns a single JSON code block. Call via `runHorusAgent()`.
+
+| Slug | Alias | Input → Output |
+|------|-------|----------------|
+| `horus-felix-failure-triage` | `horus-felix` | `FelixInput` → `FelixOutput` |
+| `horus-greta-coverage-analyst` | `horus-greta` | `GretaInput` → `GretaOutput` |
+| `horus-iris-insight-reporter` | `horus-iris` | `IrisInput` → `IrisOutput` |
+| `horus-percy-pr-reviewer` | `horus-percy` | `PercyInput` → `PercyOutput` |
+| `horus-kurt-striker-mutation-analyst` | `horus-kurt` | `KurtInput` → `KurtOutput` |
+
+TypeScript contracts for all Horus inputs and outputs:
+
+```typescript
+import type {
+  FelixInput, FelixOutput,
+  GretaInput, GretaOutput,
+  IrisInput, IrisOutput,
+  PercyInput, PercyOutput,
+  KurtInput, KurtOutput,
+} from '@wutangbanger/claude-agents/contracts';
+```
+
+### Skills
+
+| Slug (MCP tool) | Purpose |
+|-----------------|---------|
+| `skill-testing-test-architect` | Design test strategies; produce structured test plans |
+| `skill-testing-api-test-engineer` | REST/GraphQL test suites with mocked deps |
+| `skill-testing-accessibility-auditor` | WCAG 2.1/2.2 audits with axe-core + Playwright |
+| `skill-testing-ci-quality-gatekeeper` | CI quality gates (lint, coverage, E2E, security, a11y) |
+| `skill-testing-playwright-qa-agent` | Full-site Playwright UI test suite with Page Objects |
 
 ## Environment variables
 
-| Variable | Required | Default |
-|----------|----------|---------|
-| `ANTHROPIC_API_KEY` | Yes | — |
-| `CLAUDE_AGENTS_MODEL` | No | Each agent's configured model |
+| Variable | Required | Notes |
+|----------|----------|-------|
+| `ANTHROPIC_API_KEY` | Yes | Anthropic API key |
+| `CLAUDE_AGENTS_MODEL` | No | Override model for all agents |
