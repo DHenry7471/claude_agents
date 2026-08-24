@@ -1,0 +1,76 @@
+name: Publish
+
+# Triggered by pushing a version tag, e.g.:
+#   git tag v3.2.1 && git push origin v3.2.1
+#
+# Uses npm Trusted Publishing (OIDC) — no NPM_TOKEN secret. This requires one-time setup on
+# npmjs.com: package settings → Trusted Publisher → GitHub Actions, with:
+#   Organization or user:  wutangbanger (or whichever npm org/user owns the package)
+#   Repository:             <this repo>
+#   Workflow filename:      publish.yml
+#   Environment name:       npm-publish   (optional but recommended — see `environment:` below;
+#                            requires creating a matching environment under repo Settings →
+#                            Environments, which also lets you add required reviewers)
+#   Allowed actions:        npm publish
+# See https://docs.npmjs.com/trusted-publishers/
+#
+# pnpm is used for install/test/build (this repo's toolchain), but the actual publish step uses
+# `npm publish` directly — pnpm's OIDC/trusted-publishing support is currently unreliable
+# (https://github.com/pnpm/pnpm/issues/11513), while npm has first-class documented support.
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+  id-token: write # required for OIDC trusted publishing — do not remove
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm-publish # optional — remove if you didn't create this GitHub environment
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Set up Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22 # trusted publishing requires npm >= 11.5.1 (bundled with Node >= 22.14)
+          registry-url: 'https://registry.npmjs.org'
+          cache: pnpm
+          cache-dependency-path: mcp/pnpm-lock.yaml
+
+      - name: Ensure npm >= 11.5.1 (required for OIDC trusted publishing)
+        run: npm install -g npm@latest
+
+      - name: Install dependencies
+        run: cd mcp && pnpm install --frozen-lockfile
+
+      - name: Verify tag matches mcp/package.json version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION=$(node -p "require('./mcp/package.json').version")
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match mcp/package.json version $PKG_VERSION"
+            exit 1
+          fi
+
+      - name: Test
+        run: cd mcp && pnpm run test
+
+      - name: Build
+        run: cd mcp && pnpm run build
+
+      - name: Publish to npm (Trusted Publishing via OIDC)
+        # Plain `npm publish`, not `pnpm publish` — see note above. No token needed: npm detects
+        # the OIDC context from `id-token: write` + the trusted publisher config on npmjs.com.
+        # Provenance attestation is generated automatically under trusted publishing.
+        run: cd mcp && npm publish --access public

@@ -57,10 +57,27 @@ ANTHROPIC_API_KEY=sk-... pnpm run dev # via tsx, no build step
 
 ### Publishing
 
+**Automated (preferred):** bump `mcp/package.json`'s `version`, commit, then push a matching
+`vX.Y.Z` tag — `.github/workflows/publish.yml` builds, tests, verifies the tag matches
+`mcp/package.json`, and runs `npm publish --access public`.
+
+```bash
+git tag v3.2.1
+git push origin v3.2.1
+```
+
+Uses npm **Trusted Publishing** (OIDC) — no token secret to store or leak. One-time setup on
+npmjs.com: package settings → Trusted Publisher → GitHub Actions → set repo, workflow filename
+(`publish.yml`), and optionally an environment name matching the workflow's
+`environment: npm-publish`. See the comment block at the top of `publish.yml` and
+https://docs.npmjs.com/trusted-publishers/.
+
+**Manual:**
+
 ```bash
 cd mcp
 pnpm run build   # also runs automatically via prepublishOnly
-pnpm publish
+pnpm publish --access public
 ```
 
 ### Programmatic use (Horus)

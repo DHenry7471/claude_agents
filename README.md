@@ -430,7 +430,14 @@ Horus agents accept `input` (JSON string per contract), `model?`, `max_tokens?`.
 | `skill-testing-playwright-qa-agent`         | Skill        |
 | `list-agents-and-skills`                    | Utility      |
 
-Adding or editing agents/skills requires rebuilding and republishing the package (`pnpm run build && pnpm publish --access public` from `mcp/`). Run `pnpm run test` first — it covers `runAgent()`/`runHorusAgent()`/`registry.ts` with the Anthropic SDK mocked.
+Adding or editing agents/skills requires rebuilding and republishing the package. Run
+`pnpm run test` first — it covers `runAgent()`/`runHorusAgent()`/`registry.ts` with the
+Anthropic SDK mocked. To publish, bump `mcp/package.json`'s `version`, commit, then push a
+matching tag (`git tag v3.2.1 && git push origin v3.2.1`) — `.github/workflows/publish.yml`
+builds, tests, and publishes automatically via npm **Trusted Publishing** (OIDC — no token
+secret required; one-time setup on npmjs.com, see the comments in `publish.yml`). (Manual
+fallback: `pnpm run build && pnpm publish --access public` from `mcp/`, if you're logged into
+npm locally.)
 
 ---
 
@@ -454,6 +461,7 @@ with `/skill:<name>`.
 .github/
   workflows/
     repo-quality-gate.yml     # This repo's own CI gate: mcp build, mcp test, agent lint
+    publish.yml                # Publishes mcp/ to npm on a `vX.Y.Z` tag push
 .pi/
   settings.json               # Pi config
 AGENTS.md                     # Repo context for Pi and other coding agents
