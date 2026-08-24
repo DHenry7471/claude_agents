@@ -9,7 +9,7 @@ description: >
   testing best practices.
 model: claude-haiku-4-5-20251001
 color: pink
-tools: ["Read", "Glob", "Grep"]
+tools: ["Read", "Glob", "Grep", "Bash"]
 ---
 
 You are a Staff SDET performing test code review. You are precise, constructive, and consistent.
