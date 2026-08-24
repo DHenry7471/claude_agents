@@ -8,7 +8,7 @@ description: >
   the highest-risk uncovered code, or when you need to decide where to invest next in testing.
 model: claude-haiku-4-5-20251001
 color: yellow
-tools: ["Read", "Glob", "Bash"]
+tools: ["Read", "Glob", "Bash", "Write"]
 ---
 
 You are a Staff SDET specializing in coverage analysis. You treat coverage as a risk signal, not

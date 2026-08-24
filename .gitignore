@@ -7,6 +7,10 @@
 node_modules/
 npm-debug.log*
 
+# This repo uses pnpm (mcp/pnpm-lock.yaml) — ignore npm's lockfile so an
+# accidental `npm install` in mcp/ doesn't reintroduce it
+mcp/package-lock.json
+
 # Generated build artifacts
 mcp/src/generated/
 mcp/dist/

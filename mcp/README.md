@@ -85,9 +85,12 @@ Agent and skill prompts are bundled at build time from `../agents/` and `../skil
 ```bash
 pnpm run build   # bundle-prompts.mjs + tsc → dist/
 pnpm run dev     # tsx src/mcp.ts — no build step needed
+pnpm run test    # bundle-prompts.mjs + vitest run — unit tests for src/api.ts + src/registry.ts
 ```
 
-Adding or editing agents/skills requires a rebuild before the changes appear.
+Adding or editing agents/skills requires a rebuild before the changes appear. `pnpm run test`
+covers `runAgent()`/`runHorusAgent()` (alias resolution, model precedence, Horus JSON
+extraction, error branches) with the Anthropic SDK mocked — no live API calls or key required.
 
 ## Bundled agents
 

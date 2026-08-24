@@ -25,8 +25,14 @@ export async function runAgent(
 
   const agent = lookupAgent(agentName);
   if (!agent) {
-    const available = listAgents().map(a => a.slug).join(', ');
+    const available = listAgents().filter(a => !a.horus).map(a => a.slug).join(', ');
     throw new Error(`Unknown agent "${agentName}". Available: ${available}`);
+  }
+  if (agent.horus) {
+    throw new Error(
+      `Agent "${agentName}" is a Horus API variant (horus: true) — it expects a pre-packed JSON ` +
+      `input and always returns a JSON code block. Use runHorusAgent() instead of runAgent().`
+    );
   }
 
   const model = options.model ?? process.env.CLAUDE_AGENTS_MODEL ?? agent.model;

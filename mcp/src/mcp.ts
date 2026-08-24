@@ -174,6 +174,8 @@ server.tool(
     const rows = [
       '## Agents\n',
       ...agents.map(a => `**${a.slug}** (model: ${a.model})\n${a.description}`),
+      '\n## Horus Agents\n',
+      ...horusAgents.map(a => `**${a.slug}** (model: ${a.model})\n${a.description}`),
       '\n## Skills\n',
       ...skills.map(s => `**${s.slug}**\n${s.description}`),
     ];

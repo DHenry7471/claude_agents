@@ -1,6 +1,6 @@
 {
   "name": "@wutangbanger/claude-agents",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "12 Claude Code subagents + 5 Horus API agents + 5 skills for quality engineering — test strategy, API testing, Playwright E2E, contract testing, mutation analysis, CI quality gates, coverage analysis, and failure triage.",
   "type": "module",
   "main": "./dist/index.js",
@@ -26,6 +26,8 @@
     "build": "node scripts/bundle-prompts.mjs && tsc",
     "dev": "tsx src/mcp.ts",
     "start": "node dist/mcp.js",
+    "pretest": "node scripts/bundle-prompts.mjs",
+    "test": "vitest run",
     "prepublishOnly": "node scripts/bundle-prompts.mjs && tsc"
   },
   "dependencies": {
@@ -37,7 +39,8 @@
     "@types/node": "^22.0.0",
     "gray-matter": "^4.0.3",
     "tsx": "^4.19.0",
-    "typescript": "^5.8.0"
+    "typescript": "^5.8.0",
+    "vitest": "^4.1.11"
   },
   "engines": {
     "node": ">=20.0.0",

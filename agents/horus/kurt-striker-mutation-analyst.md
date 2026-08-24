@@ -6,7 +6,7 @@ description: >
   dangerous survivors. No filesystem or shell access required — the report is provided in the
   user message. Always returns a single JSON code block conforming to KurtOutput. Use in Horus
   pipelines after a Stryker run has produced mutation.json and the calling code has read it.
-model: inherit
+model: claude-haiku-4-5-20251001
 horus: true
 color: red
 ---
