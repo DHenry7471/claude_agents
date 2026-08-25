@@ -32,14 +32,14 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.52.0",
-    "@modelcontextprotocol/sdk": "^1.12.0",
-    "zod": "^3.25.0"
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@types/node": "^22.0.0",
+    "@types/node": "^22.20.1",
     "gray-matter": "^4.0.3",
-    "tsx": "^4.19.0",
-    "typescript": "^5.8.0",
+    "tsx": "^4.23.12",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.11"
   },
   "engines": {
